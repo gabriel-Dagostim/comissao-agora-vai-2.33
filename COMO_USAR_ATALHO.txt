@@ -1,0 +1,19 @@
+COMO ABRIR O APP SEM O CURSOR
+==============================
+
+1. Dê dois cliques em: Iniciar_Consulta_Comissao.bat
+   O navegador pode abrir em http://localhost:8000 (ou a porta configurada no .env).
+
+
+COMO COLOCAR O ÍCONE (logo1) NO ATALHO
+======================================
+
+1. Clique com o botão direito em "Iniciar_Consulta_Comissao.bat"
+2. Enviar para → Área de trabalho (criar atalho)
+3. Na área de trabalho, clique com o botão direito no atalho criado
+4. Propriedades
+5. Aba "Atalho" → botão "Alterar ícone..."
+6. "Procurar..." e escolha o arquivo "logo1.ico" desta pasta
+7. OK → OK
+
+Pronto: o atalho passará a usar a logo como ícone.
