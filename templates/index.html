@@ -3,109 +3,130 @@
 
 <div class="page-consulta">
   <section class="consulta-form-section">
-    <div class="card consulta-card">
-      <div class="card-body">
+    <div class="consulta-card">
+      <div class="consulta-card__header">
         <h1 class="consulta-title">Consulta de Comissão</h1>
-        <p class="consulta-subtitle">Informe o EAN ou o código interno do produto</p>
+        <p class="consulta-subtitle">Informe o EAN ou o código interno do produto para consultar os percentuais por cargo.</p>
+      </div>
 
-        <form method="get" action="{{ url_for('index') }}" class="consulta-form">
-          <div class="row g-3 align-items-end">
-            <div class="col-md-5">
-              <label class="form-label" for="eanInput">EAN</label>
-              <input id="eanInput" class="form-control form-control-lg" name="ean" value="{{ ean_val }}" placeholder="Somente números" autocomplete="off">
-            </div>
-            <div class="col-md-5">
-              <label class="form-label" for="codInput">Código interno</label>
-              <input id="codInput" class="form-control form-control-lg" name="codproduto" value="{{ cod_val }}" placeholder="Somente números" autocomplete="off">
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-              <button class="btn btn-primary btn-lg w-100" type="submit" {{ 'disabled' if not use_db }}>
-                Consultar
-              </button>
+      <form method="get" action="{{ url_for('index') }}" class="consulta-form" autocomplete="off">
+        <div class="consulta-form__grid">
+          <div class="input-field">
+            <label class="input-field__label" for="eanInput">EAN</label>
+            <div class="input-field__wrap">
+              <span class="input-field__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+              </span>
+              <input id="eanInput" class="input-field__control" name="ean" value="{{ ean_val }}" placeholder="Ex.: 7891234567890" inputmode="numeric" pattern="[0-9]*" maxlength="14" autocomplete="off">
             </div>
           </div>
-        </form>
-
-        <div class="consulta-meta">
-          <span class="badge-db {{ 'badge-db--ok' if use_db else 'badge-db--off' }}">
-            {{ 'Banco conectado' if use_db else 'Banco não configurado' }}
-          </span>
-          <span class="text-muted small">{{ ultima_atualizacao }}</span>
+          <div class="input-field">
+            <label class="input-field__label" for="codInput">Código interno</label>
+            <div class="input-field__wrap">
+              <span class="input-field__icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M8 10h8M8 14h5"/></svg>
+              </span>
+              <input id="codInput" class="input-field__control" name="codproduto" value="{{ cod_val }}" placeholder="Ex.: 12345" inputmode="numeric" pattern="[0-9]*" maxlength="12" autocomplete="off">
+            </div>
+          </div>
+          <div class="consulta-form__action">
+            <button class="btn-consultar" type="submit" {{ 'disabled' if not use_db }}>
+              <span>Consultar</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </button>
+          </div>
         </div>
-      </div>
+        <p class="consulta-form__hint">Preencha apenas um dos campos — EAN ou código interno.</p>
+      </form>
     </div>
   </section>
 
   {% if produto_info and resultados %}
   <section class="resultado-section" aria-label="Resultado da consulta">
-    <div class="resultado-section__brand">
-      <img src="{{ url_for('static', filename='img/logo1.png') }}" alt="" class="resultado-section__logo" aria-hidden="true">
-      <span class="resultado-section__label">Resultado da consulta</span>
+    <div class="section-heading">
+      <h2 class="section-heading__title">Resultado da consulta</h2>
     </div>
-    <div class="produto-resumo card">
-      <div class="card-body">
-        <h2 class="produto-resumo__titulo">Produto consultado</h2>
-        <div class="produto-resumo__grid">
-          <div class="produto-resumo__item">
-            <span class="produto-resumo__label">EAN</span>
-            <span class="produto-resumo__valor">{{ produto_info.ean or '—' }}</span>
-          </div>
-          <div class="produto-resumo__item">
-            <span class="produto-resumo__label">Código</span>
-            <span class="produto-resumo__valor">{{ produto_info.codproduto or '—' }}</span>
-          </div>
-          <div class="produto-resumo__item produto-resumo__item--wide">
-            <span class="produto-resumo__label">Descrição</span>
-            <span class="produto-resumo__valor">{{ produto_info.descricao or '—' }}</span>
-          </div>
-          <div class="produto-resumo__item">
-            <span class="produto-resumo__label">Fabricante</span>
-            <span class="produto-resumo__valor">{{ produto_info.fabricante or '—' }}</span>
-          </div>
-          <div class="produto-resumo__item">
-            <span class="produto-resumo__label">Marca</span>
-            <span class="produto-resumo__valor">{{ produto_info.marca or '—' }}</span>
-          </div>
-          <div class="produto-resumo__item">
-            <span class="produto-resumo__label">Família</span>
-            <span class="produto-resumo__valor">{{ produto_info.familia or '—' }}</span>
-          </div>
-          <div class="produto-resumo__item">
-            <span class="produto-resumo__label">Categoria</span>
-            <span class="produto-resumo__valor">{{ produto_info.categoria or '—' }}</span>
-          </div>
-          <div class="produto-resumo__item">
-            <span class="produto-resumo__label">Linha</span>
-            <span class="produto-resumo__valor">{{ produto_info.linha or '—' }}</span>
-          </div>
+
+    <div class="produto-resumo">
+      <h3 class="produto-resumo__titulo">Produto consultado</h3>
+      <div class="produto-resumo__grid">
+        <div class="produto-resumo__item">
+          <span class="produto-resumo__label">EAN</span>
+          <span class="produto-resumo__valor">{{ produto_info.ean or '—' }}</span>
+        </div>
+        <div class="produto-resumo__item">
+          <span class="produto-resumo__label">Código</span>
+          <span class="produto-resumo__valor">{{ produto_info.codproduto or '—' }}</span>
+        </div>
+        <div class="produto-resumo__item produto-resumo__item--wide">
+          <span class="produto-resumo__label">Descrição</span>
+          <span class="produto-resumo__valor">{{ produto_info.descricao or '—' }}</span>
+        </div>
+        <div class="produto-resumo__item">
+          <span class="produto-resumo__label">Fabricante</span>
+          <span class="produto-resumo__valor">{{ produto_info.fabricante or '—' }}</span>
+        </div>
+        <div class="produto-resumo__item">
+          <span class="produto-resumo__label">Família</span>
+          <span class="produto-resumo__valor">{{ produto_info.familia or '—' }}</span>
+        </div>
+        <div class="produto-resumo__item">
+          <span class="produto-resumo__label">Categoria</span>
+          <span class="produto-resumo__valor">{{ produto_info.categoria or '—' }}</span>
+        </div>
+        <div class="produto-resumo__item">
+          <span class="produto-resumo__label">Linha</span>
+          <span class="produto-resumo__valor">{{ produto_info.linha or '—' }}</span>
         </div>
       </div>
     </div>
 
-    <h2 class="comissao-cards__titulo">Comissão por cargo</h2>
+    <div class="section-heading section-heading--with-info">
+      <h2 class="section-heading__title">Comissão por cargo</h2>
+      <button type="button" class="info-trigger" id="comissaoInfoGlobal" aria-expanded="false" aria-controls="comissaoInfoPanel">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        <span>Como funciona?</span>
+      </button>
+    </div>
+
+    <div class="info-panel" id="comissaoInfoPanel" hidden>
+      <p><strong>Como a comissão é calculada:</strong> o percentual exibido é aplicado sobre o valor da venda do produto, seguindo a regra de maior prioridade cadastrada no sistema (produto → família → marca → fabricante → categoria → linha → filial).</p>
+      <p><strong>Quando recebo:</strong> o crédito segue o calendário de folha/comissão da farmácia. Para datas exatas de pagamento, consulte seu gestor ou o RH.</p>
+      <p class="info-panel__note">Valores meramente consultivos — confirme regras vigentes com a gestão comercial.</p>
+    </div>
+
     <div class="comissao-cards">
       {% for r in resultados %}
-      <article class="comissao-card card comissao-card--animate">
-        <div class="comissao-card__shine" aria-hidden="true"></div>
-        <div class="comissao-card__accent"></div>
-        <div class="comissao-card__media">
-          <dotlottie-wc class="comissao-card__lottie" src="{{ url_for('static', filename='animations/Money.lottie') }}" autoplay loop mode="normal" aria-hidden="true"></dotlottie-wc>
+      <article class="comissao-card comissao-card--animate" style="--card-delay: {{ loop.index0 * 0.07 }}s">
+        <div class="comissao-card__glow" aria-hidden="true"></div>
+        <div class="comissao-card__coins" aria-hidden="true">
+          <span class="coin coin--1">$</span>
+          <span class="coin coin--2">$</span>
+          <span class="coin coin--3">$</span>
         </div>
-        <div class="card-body">
+        <div class="comissao-card__top">
           <div class="comissao-card__cargo">
-            <span class="comissao-card__cd">#{{ r.cd_cargo }}</span>
+            <span class="comissao-card__cd">Cargo #{{ r.cd_cargo }}</span>
             <h3 class="comissao-card__nome">{{ r.cargo }}</h3>
           </div>
-          <div class="comissao-card__valor">
-            {% if r.perc is not none %}
-            <span class="comissao-card__perc">{{ "%.2f"|format(r.perc) }}<small>%</small></span>
-            {% else %}
-            <span class="comissao-card__perc comissao-card__perc--na">—</span>
-            {% endif %}
-          </div>
-          <div class="comissao-card__nivel">
-            <span class="nivel-badge">{{ r.nivel }}</span>
-          </div>
+          <button type="button" class="info-trigger info-trigger--card" data-info-trigger aria-label="Informações sobre esta comissão">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          </button>
+        </div>
+        <div class="comissao-card__valor">
+          {% if r.perc is not none %}
+          <span class="comissao-card__perc">{{ "%.2f"|format(r.perc) }}<small>%</small></span>
+          <span class="comissao-card__valor-label">comissão sobre a venda</span>
+          {% else %}
+          <span class="comissao-card__perc comissao-card__perc--na">—</span>
+          {% endif %}
+        </div>
+        <div class="comissao-card__footer">
+          <span class="nivel-badge">{{ r.nivel }}</span>
+        </div>
+        <div class="info-popover" hidden role="tooltip">
+          <p>Percentual vigente para este cargo conforme regra <strong>{{ r.nivel }}</strong>.</p>
+          <p>O pagamento ocorre no ciclo de comissão/folha — confirme a data com seu gestor.</p>
         </div>
       </article>
       {% endfor %}
@@ -113,18 +134,5 @@
   </section>
   {% endif %}
 </div>
-
-{% if produto_info and resultados %}
-<script type="module" src="https://unpkg.com/@lottiefiles/dotlottie-wc@latest/dist/dotlottie-wc.js"></script>
-<script>
-(function () {
-  var ean = document.getElementById("eanInput");
-  var cod = document.getElementById("codInput");
-  if (ean) ean.value = "";
-  if (cod) cod.value = "";
-  if (ean) ean.focus();
-})();
-</script>
-{% endif %}
 
 {% endblock %}

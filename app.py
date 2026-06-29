@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import unicodedata
@@ -7,6 +8,8 @@ import pandas as pd
 from flask import Flask, render_template, request, flash
 from waitress import serve
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -26,10 +29,26 @@ STATIC_DIR = BASE_DIR / "static"
 for d in (DATA_DIR, STATIC_DIR):
     d.mkdir(exist_ok=True, parents=True)
 
-APP_TITLE = "Consulta de Comissão - Farmácias Estrela"
+APP_TITLE = "Consulta de Comissão"
+APP_BRAND = "SIT Estrela"
+APP_BRAND_SUB = "Setor de Inovação e Tecnologia"
 
 app = Flask(__name__)
+app.config["DEBUG"] = False
+app.config["TESTING"] = False
+app.config["PROPAGATE_EXCEPTIONS"] = False
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "segredo-simples")
+
+
+@app.after_request
+def set_security_headers(response):
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    return response
 
 # ============================
 # Configuração de Banco (SQL Server)
@@ -593,16 +612,19 @@ def index():
                         "nivel": str(r.get("nivel_aplicado") or "—"),
                     })
 
-        except Exception as e:
-            flash(f"Erro na consulta do banco: {e}", "danger")
-
-    ultima = "Consulta direta no banco" if use_db else "Configure o .env para conectar ao banco"
+        except Exception:
+            logger.exception("Falha na consulta de comissão")
+            flash(
+                "Não foi possível concluir a consulta. Tente novamente ou contate o suporte.",
+                "danger",
+            )
 
     return render_template(
         "index.html",
         app_title=APP_TITLE,
+        app_brand=APP_BRAND,
+        app_brand_sub=APP_BRAND_SUB,
         use_db=use_db,
-        ultima_atualizacao=ultima,
         default_filial=default_filial,
         default_cargos=default_cargos,
         filial_val=filial,
