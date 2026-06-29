@@ -6,6 +6,7 @@ services:
       - "3684"
     environment:
       SERVICE_FQDN_COMISSAO: consultacomissao
+      SERVICE_URL_COMISSAO: http://consultacomissao.192.168.0.55.sslip.io
       FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
       HOST: 0.0.0.0
       PORT: 3684
