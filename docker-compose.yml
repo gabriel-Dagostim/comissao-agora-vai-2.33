@@ -1,0 +1,18 @@
+services:
+  comissao:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "3688:3684"
+    environment:
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
+      HOST: 0.0.0.0
+      PORT: 3684
+      DB_DRIVER: ${DB_DRIVER:-ODBC Driver 17 for SQL Server}
+      DB_SERVER: ${DB_SERVER}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_TRUSTED: ${DB_TRUSTED:-0}
+      DEFAULT_FILIAL: ${DEFAULT_FILIAL:-1}
+      DEFAULT_CARGOS: ${DEFAULT_CARGOS:-1,5,7,22,23,28,31,32}

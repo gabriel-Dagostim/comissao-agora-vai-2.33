@@ -1,0 +1,10 @@
+.git
+.gitattributes
+.env
+__pycache__
+*.pyc
+*.pyo
+data/
+*.bat
+COMO_USAR_ATALHO.txt
+make_icon.py
