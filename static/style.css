@@ -218,11 +218,13 @@ body.app-body {
 }
 
 .btn-consultar {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   height: 3.1rem;
+  min-width: 9.5rem;
   padding: 0 1.35rem;
   border: none;
   border-radius: var(--radius-sm);
@@ -235,6 +237,36 @@ body.app-body {
   box-shadow: 0 4px 14px rgba(185, 28, 28, 0.35);
   transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
   white-space: nowrap;
+  overflow: hidden;
+}
+
+.btn-consultar__content {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-consultar__progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 100%;
+  width: 0;
+  background: rgba(255, 255, 255, 0.22);
+  pointer-events: none;
+  transition: width 0.08s linear;
+}
+
+.btn-consultar.is-cooling {
+  cursor: wait;
+  box-shadow: 0 2px 8px rgba(185, 28, 28, 0.25);
+}
+
+.btn-consultar.is-cooling .btn-consultar__content {
+  opacity: 0.92;
 }
 
 .btn-consultar:hover:not(:disabled) {

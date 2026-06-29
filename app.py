@@ -1,6 +1,7 @@
 import logging
 import os
 import re
+import time
 import unicodedata
 from pathlib import Path
 
@@ -32,6 +33,8 @@ for d in (DATA_DIR, STATIC_DIR):
 APP_TITLE = "Consulta de Comissão"
 APP_BRAND = "SIT Estrela"
 APP_BRAND_SUB = "Setor de Inovação e Tecnologia"
+CONSULT_COOLDOWN_SEC = 4
+_last_consult_by_ip: dict[str, float] = {}
 
 app = Flask(__name__)
 app.config["DEBUG"] = False
@@ -570,6 +573,22 @@ ORDER BY f.cd_cargo, f.cd_prod;
     return produto_info, df
 
 
+def _client_ip() -> str:
+    forwarded = request.headers.get("X-Forwarded-For", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+
+def _consult_cooldown_remaining(ip: str) -> float:
+    last = _last_consult_by_ip.get(ip, 0.0)
+    return max(0.0, CONSULT_COOLDOWN_SEC - (time.time() - last))
+
+
+def _register_consult(ip: str) -> None:
+    _last_consult_by_ip[ip] = time.time()
+
+
 # ============================
 # Rotas
 # ============================
@@ -589,35 +608,44 @@ def index():
     resultados = None
 
     if use_db and (only_digits(ean) or only_digits(cod)):
-        try:
-            filial_i = int(only_digits(filial) or default_filial)
-            cargos = [int(x) for x in re.findall(r"\d+", cargos_raw)] if cargos_raw else [1, 5, 7, 22, 23, 28, 31, 32]
-
-            produto_info, df = consultar_comissao_db(
-                filial=filial_i,
-                cargos=cargos,
-                codproduto=cod or None,
-                ean=ean or None,
-            )
-
-            if df.empty:
-                flash("Produto não encontrado (ou sem regra para os cargos informados).", "warning")
-            else:
-                resultados = []
-                for _, r in df.iterrows():
-                    resultados.append({
-                        "cargo": str(r.get("nome_cargo") or f"Cargo {int(r['cd_cargo'])}"),
-                        "cd_cargo": int(r["cd_cargo"]),
-                        "perc": float(r["perc_comissao_final"]) if pd.notna(r["perc_comissao_final"]) else None,
-                        "nivel": str(r.get("nivel_aplicado") or "—"),
-                    })
-
-        except Exception:
-            logger.exception("Falha na consulta de comissão")
+        client_ip = _client_ip()
+        cooldown_left = _consult_cooldown_remaining(client_ip)
+        if cooldown_left > 0:
             flash(
-                "Não foi possível concluir a consulta. Tente novamente ou contate o suporte.",
-                "danger",
+                f"Aguarde {int(cooldown_left + 0.99)} segundos antes de consultar novamente.",
+                "warning",
             )
+        else:
+            _register_consult(client_ip)
+            try:
+                filial_i = int(only_digits(filial) or default_filial)
+                cargos = [int(x) for x in re.findall(r"\d+", cargos_raw)] if cargos_raw else [1, 5, 7, 22, 23, 28, 31, 32]
+
+                produto_info, df = consultar_comissao_db(
+                    filial=filial_i,
+                    cargos=cargos,
+                    codproduto=cod or None,
+                    ean=ean or None,
+                )
+
+                if df.empty:
+                    flash("Produto não encontrado (ou sem regra para os cargos informados).", "warning")
+                else:
+                    resultados = []
+                    for _, r in df.iterrows():
+                        resultados.append({
+                            "cargo": str(r.get("nome_cargo") or f"Cargo {int(r['cd_cargo'])}"),
+                            "cd_cargo": int(r["cd_cargo"]),
+                            "perc": float(r["perc_comissao_final"]) if pd.notna(r["perc_comissao_final"]) else None,
+                            "nivel": str(r.get("nivel_aplicado") or "—"),
+                        })
+
+            except Exception:
+                logger.exception("Falha na consulta de comissão")
+                flash(
+                    "Não foi possível concluir a consulta. Tente novamente ou contate o suporte.",
+                    "danger",
+                )
 
     return render_template(
         "index.html",
